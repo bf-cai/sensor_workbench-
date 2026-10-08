@@ -17,6 +17,9 @@ Frontend assets are compiled and served by the backend. Node is not a runtime re
 ## Target layout
 
 Create directories when working code requires them, not as empty scaffolding.
+Application code and commands live at the repository root. Agent/developer
+documents remain in `sensor-workbench-agent-plan-final/docs/`; the root
+`AGENTS.md` points to the full execution procedure in the planning directory.
 
     backend/
       pyproject.toml
@@ -40,10 +43,12 @@ Create directories when working code requires them, not as empty scaffolding.
         components/
       tests/
     deploy/
-    docs/
-      agent/
-      user/
-      developer/
+    sensor-workbench-agent-plan-final/
+      AGENTS.md
+      docs/
+        agent/
+        user/
+        developer/
     Makefile
     AGENTS.md
     README.md

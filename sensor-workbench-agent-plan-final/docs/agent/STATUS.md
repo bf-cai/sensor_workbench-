@@ -1,16 +1,16 @@
 # Current Status
 
-- **State:** `ready`
-- **Active stage:** none
+- **State:** `blocked`
+- **Active stage:** `01`
 - **Last completed stage:** none
 - **Next stage:** `01`
-- **Updated UTC:** 2026-10-08, initial planning package
+- **Updated UTC:** 2026-10-08T21:40:54.684374+00:00
 
 ## Stage register
 
 | Stage | State |
 |---|---|
-| 01 | NOT_STARTED |
+| 01 | BLOCKED |
 | 02 | NOT_STARTED |
 | 03 | NOT_STARTED |
 | 04 | NOT_STARTED |
@@ -22,7 +22,7 @@
 
 ## Current checkpoint
 
-No implementation has started. No application code, device integration, build, or runtime test has been verified.
+Stage 01 implementation is present but unaccepted. Thirty-six non-TCP backend tests pass; the full suite has one socket-permission failure. Required quality targets fail because uv/npm are unavailable. Lockfiles, frontend build/browser checks, and fresh-install acceptance remain incomplete. See [Stage 01 handoff](handoffs/01.md). Application code now lives at the Git repository root; agent/developer documents remain under `sensor-workbench-agent-plan-final/docs/`. Relocation references have been repaired and verified; the existing acceptance blockers remain.
 
 ## State rules
 
@@ -40,8 +40,8 @@ Do not advance after a failed mandatory gate. Record unavailable physical hardwa
 
 ## Active-stage checkpoint
 
-- Current task: none.
-- Changed files: none.
-- Verification performed: none.
-- Blockers: none.
-- Required next action: Stage 01.
+- Current task: completed layout repair and verification; Stage 01 remains blocked on its existing acceptance gates.
+- Changed files: Stage 01 implementation plus root AGENTS/.gitignore/Markdown lint configuration/README, web/package.json, planning AGENTS/ARCHITECTURE/STATUS/handoffs/01.md. User file moves preserved.
+- Verification performed: relocated full pytest has 36 PASS and 1 socket EPERM FAIL; generated API types/source CLI/docstrings/Pyflakes/backend-only wheel PASS. README/agent links, tooling paths, asset output, and Git ignores verified. make -k quality FAIL: uv/npm missing. See handoff for commands and limits.
+- Blockers: missing uv/Node/npm/Ruff/mypy and dependency access; missing lockfiles; TCP socket creation denied; frontend tools/build/browser acceptance NOT_RUN.
+- Required next action: run from the application repository root and resume Stage 01 with dependency access, required tools, and permitted loopback sockets; generate real lockfiles, bootstrap, format, run full quality and browser/fresh-install checks. Do not start Stage 02.
