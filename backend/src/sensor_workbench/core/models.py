@@ -81,8 +81,15 @@ class Timestamp(Contract):
     unit: Literal["ns", "us", "ms", "s", "ticks"]
     clock_domain_id: str = Field(min_length=1)
     semantics: Literal[
-        "sample", "first_point", "last_point", "exposure_start", "exposure_end",
-        "trigger", "transmit", "receive", "unknown",
+        "sample",
+        "first_point",
+        "last_point",
+        "exposure_start",
+        "exposure_end",
+        "trigger",
+        "transmit",
+        "receive",
+        "unknown",
     ]
 
 

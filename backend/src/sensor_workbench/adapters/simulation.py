@@ -26,19 +26,30 @@ class SimulatedSource:
         """Set source and clock identity without starting acquisition."""
         self.run_id = run_id
         self.clock_domain = ClockDomain(
-            id=f"simulation:{run_id}", owner=SOURCE_ID,
+            id=f"simulation:{run_id}",
+            owner=SOURCE_ID,
             timescale=Timescale.DEVICE_LOCAL,
             epoch_description="Synthetic sample zero at process acquisition start",
             resolution_ns=1,
         )
         self.source = Source(
-            id=SOURCE_ID, name="Simulated timing source",
-            clock_domain_id=self.clock_domain.id, simulated=True, rate_hz=10.0,
+            id=SOURCE_ID,
+            name="Simulated timing source",
+            clock_domain_id=self.clock_domain.id,
+            simulated=True,
+            rate_hz=10.0,
             provenance=PROVENANCE,
-            capabilities=(Capability(
-                owner=SOURCE_ID, method_family="simulation", evidence=PROVENANCE,
-                supported=True, available=True, active=True, verification="verified",
-            ),),
+            capabilities=(
+                Capability(
+                    owner=SOURCE_ID,
+                    method_family="simulation",
+                    evidence=PROVENANCE,
+                    supported=True,
+                    available=True,
+                    active=True,
+                    verification="verified",
+                ),
+            ),
         )
 
     def observation(self, sequence: int) -> Observation:
@@ -58,13 +69,17 @@ class SimulatedSource:
         phase = sequence % 20
         delay_ns = 10_000 + 500 * (phase if phase <= 10 else 20 - phase)
         return Observation(
-            event_id=f"{self.run_id}:{sequence}", source_id=SOURCE_ID,
+            event_id=f"{self.run_id}:{sequence}",
+            source_id=SOURCE_ID,
             sequence=sequence,
             raw_timestamp=Timestamp(
-                value=sequence * PERIOD_NS, unit="ns",
-                clock_domain_id=self.clock_domain.id, semantics="sample",
+                value=sequence * PERIOD_NS,
+                unit="ns",
+                clock_domain_id=self.clock_domain.id,
+                semantics="sample",
             ),
             metric=Metric(name="synthetic_delay", value=float(delay_ns), unit="ns"),
-            simulated=True, provenance=PROVENANCE,
+            simulated=True,
+            provenance=PROVENANCE,
             quality_flags=("simulated",),
         )

@@ -32,7 +32,9 @@ def _typescript(schema: dict[str, Any]) -> str:
             for name, value in properties.items()
         ]
         if schema.get("additionalProperties") not in (False, None):
-            raise ValueError("Open dictionaries require an explicit generator extension")
+            raise ValueError(
+                "Open dictionaries require an explicit generator extension"
+            )
         return "{\n" + "\n".join(members) + "\n}"
     raise ValueError(f"Unsupported OpenAPI schema: {schema}")
 
@@ -53,8 +55,10 @@ def generate_types() -> str:
         "// Timestamp integers are lossless decimal strings in JSON.",
     ]
     for name, schema in sorted(schemas.items()):
-        sections.append(f"/** {schema.get('title', name)} API serialization contract. */\n"
-                        f"export type {name} = {_typescript(schema)};")
+        sections.append(
+            f"/** {schema.get('title', name)} API serialization contract. */\n"
+            f"export type {name} = {_typescript(schema)};"
+        )
     return "\n\n".join(sections) + "\n"
 
 

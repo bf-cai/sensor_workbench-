@@ -18,9 +18,14 @@ class Settings(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
     host: str = "127.0.0.1"
     port: int = Field(default=8765, ge=1, le=65535, strict=True)
-    state_dir: Path = Field(default_factory=lambda: Path(
-        os.environ.get("XDG_STATE_HOME", str(Path.home() / ".local/state")),
-    ) / "sensor-workbench")
+    state_dir: Path = Field(
+        default_factory=lambda: (
+            Path(
+                os.environ.get("XDG_STATE_HOME", str(Path.home() / ".local/state")),
+            )
+            / "sensor-workbench"
+        )
+    )
     static_dir: Path = Field(default_factory=lambda: Path(__file__).parent / "static")
 
     @field_validator("host")
@@ -47,9 +52,14 @@ def load_settings(config_path: Path | None = None) -> Settings:
     """
     override = os.environ.get("SENSOR_WORKBENCH_CONFIG")
     explicit = config_path is not None or override is not None
-    path = config_path or (Path(override) if override else Path(
-        os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config")),
-    ) / "sensor-workbench/config.json")
+    path = config_path or (
+        Path(override)
+        if override
+        else Path(
+            os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config")),
+        )
+        / "sensor-workbench/config.json"
+    )
     if not explicit and not path.exists():
         return Settings()
     return Settings.model_validate(json.loads(path.read_text(encoding="utf-8")))

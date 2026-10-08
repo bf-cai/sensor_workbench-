@@ -35,7 +35,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     source = SimulatedSource(str(uuid4()))
     acquisition = Acquisition(source, boot_id)
     host_clock = ClockDomain(
-        id=f"host-monotonic:{boot_id}", owner="host",
+        id=f"host-monotonic:{boot_id}",
+        owner="host",
         timescale=Timescale.HOST_MONOTONIC,
         epoch_description="Linux CLOCK_MONOTONIC epoch for this boot",
         boot_id=boot_id,
@@ -54,7 +55,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(create_router(acquisition, host_clock))
     static_dir = settings.static_dir.resolve()
     if (static_dir / "assets").is_dir():
-        app.mount("/assets", StaticFiles(directory=static_dir / "assets"), name="assets")
+        app.mount(
+            "/assets", StaticFiles(directory=static_dir / "assets"), name="assets"
+        )
 
     @app.get("/", include_in_schema=False)
     async def overview() -> FileResponse:

@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 
 import uvicorn
+
 from sensor_workbench import __version__
 from sensor_workbench.app import create_app
 from sensor_workbench.config import load_settings
@@ -35,9 +36,15 @@ def main(argv: list[str] | None = None) -> None:
         parser.error("Run the workbench as an unprivileged user")
     try:
         settings = load_settings(arguments.config)
-        overrides = {name: getattr(arguments, name) for name in (
-            "host", "port", "static_dir",
-        ) if getattr(arguments, name) is not None}
+        overrides = {
+            name: getattr(arguments, name)
+            for name in (
+                "host",
+                "port",
+                "static_dir",
+            )
+            if getattr(arguments, name) is not None
+        }
         settings = type(settings).model_validate(settings.model_dump() | overrides)
     except (OSError, ValueError) as error:
         parser.error(str(error))

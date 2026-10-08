@@ -11,7 +11,9 @@ from sensor_workbench.services.acquisition import Acquisition, Subscription
 
 
 async def _send_stream(
-    websocket: WebSocket, acquisition: Acquisition, subscription: Subscription,
+    websocket: WebSocket,
+    acquisition: Acquisition,
+    subscription: Subscription,
 ) -> None:
     while True:
         message = await subscription.next_message(acquisition.source.run_id)
@@ -78,7 +80,9 @@ def create_router(acquisition: Acquisition, host_clock: ClockDomain) -> APIRoute
             for task in tasks:
                 task.cancel()
             for task in tasks:
-                with suppress(asyncio.CancelledError, WebSocketDisconnect, RuntimeError):
+                with suppress(
+                    asyncio.CancelledError, WebSocketDisconnect, RuntimeError
+                ):
                     await task
             acquisition.unsubscribe(subscription)
 

@@ -20,7 +20,9 @@ class Subscription:
         """Wait for an observation; expose loss since this connection subscribed."""
         observation = await self.queue.get()
         return StreamMessage(
-            run_id=run_id, dropped_total=self.dropped_total, observation=observation,
+            run_id=run_id,
+            dropped_total=self.dropped_total,
+            observation=observation,
         )
 
 
@@ -35,8 +37,11 @@ class Acquisition:
     """
 
     def __init__(
-        self, source: SimulatedSource, boot_id: str,
-        queue_size: int = 32, max_subscribers: int = 16,
+        self,
+        source: SimulatedSource,
+        boot_id: str,
+        queue_size: int = 32,
+        max_subscribers: int = 16,
     ) -> None:
         """Validate bounds and prepare acquisition without scheduling tasks."""
         if queue_size <= 0 or max_subscribers <= 0:
@@ -94,8 +99,11 @@ class Acquisition:
             receive_ns = time.monotonic_ns()
             # Skip missed sample slots instead of creating a catch-up burst.
             sequence = max(sequence, (receive_ns - epoch_ns) // PERIOD_NS)
-            observation = self.source.observation(sequence).model_copy(update={
-                "host_receive_monotonic_ns": receive_ns, "host_boot_id": self.boot_id,
-            })
+            observation = self.source.observation(sequence).model_copy(
+                update={
+                    "host_receive_monotonic_ns": receive_ns,
+                    "host_boot_id": self.boot_id,
+                }
+            )
             self.publish(observation)
             sequence += 1
