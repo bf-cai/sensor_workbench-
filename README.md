@@ -5,38 +5,40 @@ headless CLI, and React overview with live ECharts data from a deterministic
 10 Hz simulated source. Every observation carries simulation provenance, units,
 and a clock domain. Synthetic delay is not a hardware accuracy measurement.
 
-**Stage 01 remains unaccepted:** this environment lacks uv, Node/npm, and the
-required quality tools, and cannot resolve dependency download hosts. Lockfiles,
-frontend build, fresh installation, and browser acceptance still require
-verification. See [STATUS](sensor-workbench-agent-plan-final/docs/agent/STATUS.md) and [handoff](sensor-workbench-agent-plan-final/docs/agent/handoffs/01.md)
-for actual results. The commands below define the intended setup; do not treat
-unavailable checks as passed.
+See [STATUS](sensor-workbench-agent-plan-final/docs/agent/STATUS.md) and the
+[Stage 01 handoff](sensor-workbench-agent-plan-final/docs/agent/handoffs/01.md)
+for acceptance results and the next stage.
 
 ## Requirements and installation
 
-Use Linux x86-64 or ARM64, Python 3.10+, uv, and Node 22.12+ with npm during
+Use Linux x86-64 or ARM64, Python 3.10+, uv, and Node 22.13+ with npm during
 frontend development/build. Sensors, root, ROS 2, CUDA, and a GPU are unnecessary.
 Node is unnecessary when running an installed Python wheel containing compiled
 frontend assets. Run the service as an ordinary user.
 
 Run commands from the repository root containing `Makefile`, `backend/`, and
 `web/`. Agent and developer documents remain under
-`sensor-workbench-agent-plan-final/docs/`. Once dependency access and tools are
-available:
+`sensor-workbench-agent-plan-final/docs/`. With uv and Node/npm on your PATH:
 
 ```bash
-# Stage 01 recovery only: create the missing lockfiles, then retain them in source.
-make lock
 make bootstrap
-make generate-api
-make format
 make quality
 make serve
 ```
 
-After Stage 01 is accepted with both lockfiles present, repeatable setup is
-`make bootstrap`, `make build`, then `make serve`. Bootstrap uses `uv sync --locked`
-and `npm ci`; it never resolves a replacement lockfile silently.
+For setup without development checks, run `make bootstrap`, `make build`, then
+`make serve`. Bootstrap uses `uv sync --locked` and `npm ci`. Both lockfiles are
+retained in source. Dependency downloads require access to PyPI and the npm
+registry; later runs can reuse cached packages. Run `make lock` only when
+intentionally updating dependencies, then rerun the quality checks.
+
+To run the built wheel in a separate environment:
+
+```bash
+uv venv /tmp/sensor-workbench-run
+uv pip install --python /tmp/sensor-workbench-run/bin/python dist/sensor_workbench-0.1.0-py3-none-any.whl
+/tmp/sensor-workbench-run/bin/sensor-workbench serve
+```
 
 Open <http://127.0.0.1:8765>. The backend serves the compiled frontend. The overview
 shows source metadata, synthetic delay in nanoseconds, raw sample time, sequence,
@@ -135,16 +137,15 @@ To run the available system pytest without dependency installation:
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHONPATH=backend/src python3 -m pytest backend/tests -q
 ```
 
-This supplementary command was exercised on this host. The quality targets still
-require the locked tool environment. Disabling third-party pytest autoload keeps
+The quality targets require the locked tool environment. Disabling third-party pytest autoload keeps
 unrelated installed ROS plugins out of the core test suite.
 
 ## Troubleshooting
 
 - **UI HTTP 503:** run `make build`; for external assets use `serve --static-dir PATH`.
 - **Dependency tools missing:** provision uv and Node/npm for your architecture;
-  then resolve Stage 01's lockfile blocker before `make bootstrap`.
-- **DNS/download failure:** restore permitted dependency access and rerun `make lock`.
+  ensure their executables are on PATH, then run `make bootstrap`.
+- **DNS/download failure:** restore permitted dependency access and rerun `make bootstrap`.
 - **Port occupied:** choose another loopback port with `serve --port 9000`.
 - **Reconnecting/stale:** inspect backend logs and API health. The browser reconnects
   with a bounded backoff; restart creates a new run/clock identity and clears the plot.

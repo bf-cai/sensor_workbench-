@@ -24,6 +24,7 @@ Core operation must also be available through a documented CLI/headless path.
 ## Synchronization families
 
 The architecture and capability reporting must accommodate:
+
 - IEEE 1588 PTP.
 - IEEE 802.1AS gPTP, including automotive fixed-role operation.
 - PPS.
@@ -54,6 +55,7 @@ Implement real functionality through available, documented Linux interfaces and 
 ## Provisional defaults
 
 Earlier choices were recommended but not explicitly submitted as confirmed:
+
 - First-class targets: Ubuntu 22.04/24.04 and compatible Jetson Linux.
 - ROS 2 optional, not required by the core.
 - Timing metadata always recorded; full raw sensor recording selectable.

@@ -54,6 +54,7 @@ Stage 01 establishes these tools and reproducible commands. Every subsequent sta
 **Other:** ShellCheck and shfmt for maintained shell scripts; markdownlint-cli2 for Markdown; yamllint for YAML; actionlint if GitHub Actions are introduced. If C/C++ is added, configure clang-format, clang-tidy, and a real compiler/test build. If Rust is added, use rustfmt, clippy, and cargo test.
 
 Required root targets:
+
 - `make format-check`
 - `make lint`
 - `make typecheck`
@@ -103,6 +104,7 @@ Use Python `pyproject.toml` and committed `uv.lock`; frontend `package.json` and
 Before implementation, set STATUS to `in_progress`.
 
 After implementation, write `handoffs/NN.md` with:
+
 1. Outcome and working deliverables.
 2. Important files and changed public contracts.
 3. Exact checks run and PASS/FAIL/NOT_RUN results.

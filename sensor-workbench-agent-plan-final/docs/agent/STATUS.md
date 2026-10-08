@@ -1,28 +1,52 @@
 # Current Status
 
-- **State:** `blocked`
-- **Active stage:** `01`
-- **Last completed stage:** none
-- **Next stage:** `01`
-- **Updated UTC:** 2026-10-08T21:40:54.684374+00:00
+- **State:** `ready`
+- **Active stage:** none
+- **Last completed stage:** `01`
+- **Next stage:** `02`
+- **Updated UTC:** 2026-10-08T22:23:18.687995+00:00
 
 ## Stage register
 
-| Stage | State |
-|---|---|
-| 01 | BLOCKED |
-| 02 | NOT_STARTED |
-| 03 | NOT_STARTED |
-| 04 | NOT_STARTED |
-| 05 | NOT_STARTED |
-| 06 | NOT_STARTED |
-| 07 | NOT_STARTED |
-| 08 | NOT_STARTED |
-| 09 | NOT_STARTED |
+| Stage | State       |
+| ----- | ----------- |
+| 01    | COMPLETE    |
+| 02    | NOT_STARTED |
+| 03    | NOT_STARTED |
+| 04    | NOT_STARTED |
+| 05    | NOT_STARTED |
+| 06    | NOT_STARTED |
+| 07    | NOT_STARTED |
+| 08    | NOT_STARTED |
+| 09    | NOT_STARTED |
 
 ## Current checkpoint
 
-Stage 01 implementation is present but unaccepted. Thirty-six non-TCP backend tests pass; the full suite has one socket-permission failure. Required quality targets fail because uv/npm are unavailable. Lockfiles, frontend build/browser checks, and fresh-install acceptance remain incomplete. See [Stage 01 handoff](handoffs/01.md). Application code now lives at the Git repository root; agent/developer documents remain under `sensor-workbench-agent-plan-final/docs/`. Relocation references have been repaired and verified; the existing acceptance blockers remain.
+Stage 01 is accepted on Linux ARM64. The FastAPI CLI and React/ECharts overview
+run from the relocated application root. Real uv/npm lockfiles and locked
+bootstrap are present. All mandatory quality targets pass: Ruff formatting/lint,
+Prettier, typed ESLint, Markdown lint, strict mypy/TypeScript, OpenAPI drift check,
+37 pytest tests (including real TCP/cleanup), 12 Vitest tests, Vite, and Python
+wheel/sdist builds.
+
+An isolated wheel install with no system site packages served the compiled UI to
+real Chromium. Backend stream values matched the displayed values and moving
+ECharts series; provenance, units, simulation and clock identity were visible.
+Staleness, resumption, automatic reconnect after restart, new clock/run identity,
+and graceful shutdown passed. A separate fresh locked Python environment also
+installed successfully. All acceptance servers were stopped.
+
+See [Stage 01 handoff](handoffs/01.md) for commands, failures repaired, versions,
+logs, and limits. Physical hardware and x86-64 remain unverified. Production npm
+audit reports zero vulnerabilities; the development-only Markdown tooling retains
+five audit entries from one unpatched braces denial-of-service advisory. Vite
+reports a nonfatal bundle-size warning. These are documented limitations, with
+no mandatory Stage 01 gate remaining blocked.
+
+Application commands run from `/home/correct-ai/sensor_workbench`. Authoritative
+agent/developer documents remain under `sensor-workbench-agent-plan-final/docs/`.
+Stage 02 was not started. On the next instruction, read its entire stage file
+before implementation.
 
 ## State rules
 
@@ -37,11 +61,3 @@ At stage start, record the actual UTC time, active stage, and current task. Upda
 At stage completion, write `handoffs/NN.md`, mark that stage complete, set `last_completed_stage`, clear `active_stage`, and select the following stage. Set `complete` after Stage 09.
 
 Do not advance after a failed mandatory gate. Record unavailable physical hardware as unverified, not as a successful physical test.
-
-## Active-stage checkpoint
-
-- Current task: completed layout repair and verification; Stage 01 remains blocked on its existing acceptance gates.
-- Changed files: Stage 01 implementation plus root AGENTS/.gitignore/Markdown lint configuration/README, web/package.json, planning AGENTS/ARCHITECTURE/STATUS/handoffs/01.md. User file moves preserved.
-- Verification performed: relocated full pytest has 36 PASS and 1 socket EPERM FAIL; generated API types/source CLI/docstrings/Pyflakes/backend-only wheel PASS. README/agent links, tooling paths, asset output, and Git ignores verified. make -k quality FAIL: uv/npm missing. See handoff for commands and limits.
-- Blockers: missing uv/Node/npm/Ruff/mypy and dependency access; missing lockfiles; TCP socket creation denied; frontend tools/build/browser acceptance NOT_RUN.
-- Required next action: run from the application repository root and resume Stage 01 with dependency access, required tools, and permitted loopback sockets; generate real lockfiles, bootstrap, format, run full quality and browser/fresh-install checks. Do not start Stage 02.

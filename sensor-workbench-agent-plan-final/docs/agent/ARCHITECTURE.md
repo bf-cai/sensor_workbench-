@@ -66,17 +66,20 @@ Do not create multiple backend services unless justified by a real requirement. 
 
 Use typed, versioned Pydantic models. Extend compatibly; do not silently change existing field semantics.
 
-**ClockDomain**
+### ClockDomain
+
 - `id`, `owner`, `timescale`, `epoch_description`.
 - Optional `tick_rate_hz`, `resolution_ns`, `boot_id`.
 - Timescales include UTC, TAI, GPS, PTP, HOST_MONOTONIC, DEVICE_LOCAL, DEVICE_TICKS, UNKNOWN.
 
-**Timestamp**
+### Timestamp
+
 - Integer `value`, `unit`, `clock_domain_id`, `semantics`.
 - Semantics include sample, first_point, last_point, exposure_start, exposure_end, trigger, transmit, receive, unknown.
 - No implicit clock conversion.
 
-**Observation**
+### Observation
+
 - `schema_version`, `event_id`, `source_id`, optional `sequence`, `kind`.
 - Optional raw `Timestamp`.
 - Optional `host_receive_monotonic_ns` with boot ID.
@@ -84,18 +87,22 @@ Use typed, versioned Pydantic models. Extend compatibly; do not silently change 
 - Typed metric or payload reference, quality flags, simulation flag, provenance.
 - Derived common time and mapping version remain separate from raw time.
 
-**Capability**
+### Capability
+
 - Owner/source, method family, prerequisites, evidence, and distinct supported/available/active/unknown/unverified states.
 
-**ClockMapping**
+### ClockMapping
+
 - Source and target domains; raw/common anchor pair; rate/drift; validity interval; method; uncertainty; immutable version.
 - Apply anchored differences to avoid floating-point precision loss on epoch timestamps.
 - Split mappings across clock discontinuities.
 
-**Session**
+### Session
+
 - ID, sources, environment, clock domains, recording files, checksums, drop counts, completeness, provenance.
 
-**ExperimentResult**
+### ExperimentResult
+
 - Prerequisites, authorization, parameters, actions, cleanup, metrics, evidence, result and limitations.
 
 Only implement contracts required by the current stage; reserve backward-compatible fields for later capabilities rather than implementing empty services.
@@ -103,6 +110,7 @@ Only implement contracts required by the current stage; reserve backward-compati
 ## Extension boundaries
 
 Use small typed interfaces when needed:
+
 - Device source: identify, probe, observe.
 - Synchronization source: detect, observe, optional authorized control.
 - Acquisition source: start, stop, bounded observation stream.
@@ -112,6 +120,7 @@ Use an explicit internal registry, not dynamic untrusted plugin loading.
 ## API
 
 Base path `/api/v1`. Stage 01 establishes:
+
 - `GET /api/v1/health`
 - `GET /api/v1/sources`
 - `GET /api/v1/clock-domains`
