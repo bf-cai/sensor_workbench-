@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sensor-workbench"
+version = "0.1.0"
+description = "Local Linux sensor timing workbench"
+requires-python = ">=3.10"
+dependencies = ["fastapi>=0.115,<1", "pydantic>=2.11,<3", "uvicorn>=0.34,<1", "websockets>=15,<16"]
+
+[project.scripts]
+sensor-workbench = "sensor_workbench.cli:main"
+
+[dependency-groups]
+dev = ["ruff>=0.11,<1", "mypy>=1.15,<2", "pytest>=8.3,<9"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+sensor_workbench = ["static/**/*", "static/*"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "RUF", "D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
