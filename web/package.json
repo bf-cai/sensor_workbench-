@@ -3,39 +3,45 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22.12.0" },
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "format": "prettier --write . \"../*.md\" \"../sensor-workbench-agent-plan-final/**/*.md\" ../.markdownlint-cli2.jsonc",
-    "format-check": "prettier --check . \"../*.md\" \"../sensor-workbench-agent-plan-final/**/*.md\" ../.markdownlint-cli2.jsonc",
-    "lint": "eslint . && markdownlint-cli2 \"../*.md\" \"../sensor-workbench-agent-plan-final/**/*.md\" --config ../.markdownlint-cli2.jsonc",
+    "format": "prettier --write . \"../*.md\" \"../backend/*.md\" \"../sensor-workbench-agent-plan-final/**/*.md\" ../.markdownlint-cli2.jsonc",
+    "format-check": "prettier --check . \"../*.md\" \"../backend/*.md\" \"../sensor-workbench-agent-plan-final/**/*.md\" ../.markdownlint-cli2.jsonc",
+    "lint": "eslint . && markdownlint-cli2 \"../*.md\" \"../backend/*.md\" \"../sensor-workbench-agent-plan-final/**/*.md\" --config ../.markdownlint-cli2.jsonc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "build": "vite build"
   },
   "dependencies": {
-    "echarts": "^5.6.0",
+    "echarts": "^6.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.22.0",
+    "@eslint/js": "^10.0.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
-    "@vitejs/plugin-react": "^4.3.4",
-    "eslint": "^9.22.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "eslint": "^10.12.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
     "jsdom": "^26.0.0",
-    "markdownlint-cli2": "^0.17.2",
+    "markdownlint-cli2": "^0.23.3",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.26.1",
-    "vite": "^6.2.1",
-    "vitest": "^3.0.8"
+    "vite": "^8.3.4",
+    "vitest": "^5.0.3"
+  },
+  "overrides": {
+    "smol-toml": "^1.9.0",
+    "katex": "^0.18.2"
   }
 }

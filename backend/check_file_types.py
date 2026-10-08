@@ -4,10 +4,20 @@ import os
 import subprocess
 from pathlib import Path
 
-EXCLUDED_PARTS = frozenset({
-    ".git", ".venv", "node_modules", "build", "dist", "static", ".pytest_cache",
-    ".ruff_cache", ".mypy_cache", "__pycache__",
-})
+EXCLUDED_PARTS = frozenset(
+    {
+        ".git",
+        ".venv",
+        "node_modules",
+        "build",
+        "dist",
+        "static",
+        ".pytest_cache",
+        ".ruff_cache",
+        ".mypy_cache",
+        "__pycache__",
+    }
+)
 
 
 def main() -> None:
@@ -21,7 +31,9 @@ def main() -> None:
     root = Path.cwd()
     files: list[Path] = []
     for directory, subdirectories, filenames in os.walk(root):
-        subdirectories[:] = [name for name in subdirectories if name not in EXCLUDED_PARTS]
+        subdirectories[:] = [
+            name for name in subdirectories if name not in EXCLUDED_PARTS
+        ]
         files.extend(Path(directory) / name for name in filenames)
     shell = [str(path) for path in files if path.suffix == ".sh"]
     yaml = [str(path) for path in files if path.suffix in (".yml", ".yaml")]
@@ -40,7 +52,9 @@ def main() -> None:
         ("Rust", {".rs"}),
     ):
         if any(path.suffix in extensions for path in files):
-            raise RuntimeError(f"Integrate {label} formatter, linter, compiler and tests")
+            raise RuntimeError(
+                f"Integrate {label} formatter, linter, compiler and tests"
+            )
         print(f"SKIP {label}: no applicable maintained files")
 
 

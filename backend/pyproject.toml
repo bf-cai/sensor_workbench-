@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "sensor-workbench"
 version = "0.1.0"
 description = "Local Linux sensor timing workbench"
+readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["fastapi>=0.115,<1", "pydantic>=2.11,<3", "uvicorn>=0.34,<1", "websockets>=15,<16"]
 
