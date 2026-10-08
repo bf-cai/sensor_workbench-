@@ -56,8 +56,10 @@ export function parseStreamMessage(text: string): StreamMessage {
     !Number.isFinite(metric.value) ||
     typeof metric.unit !== "string" ||
     typeof metric.name !== "string" ||
-    (timestamp !== null && timestamp !== undefined &&
-      (!isRecord(timestamp) || typeof timestamp.value !== "string" ||
+    (timestamp !== null &&
+      timestamp !== undefined &&
+      (!isRecord(timestamp) ||
+        typeof timestamp.value !== "string" ||
         !/^-?[0-9]+$/.test(timestamp.value) ||
         typeof timestamp.clock_domain_id !== "string" ||
         typeof timestamp.unit !== "string" ||
@@ -91,7 +93,8 @@ export function connectStream(
     };
     socket.onmessage = (event: MessageEvent<unknown>) => {
       try {
-        if (typeof event.data !== "string") throw new Error("Expected JSON text");
+        if (typeof event.data !== "string")
+          throw new Error("Expected JSON text");
         onMessage(parseStreamMessage(event.data));
         onStatus("Connected");
       } catch {
