@@ -3,6 +3,7 @@
 import asyncio
 import json
 import os
+import signal
 import socket
 import subprocess
 import sys
@@ -23,15 +24,26 @@ def test_real_cli_server_streams_and_shuts_down(tmp_path):
     log_path = tmp_path / "server.log"
     with log_path.open("w") as log:
         process = subprocess.Popen(
-            [sys.executable, "-m", "sensor_workbench.cli", "serve", "--port", str(port)],
-            env=environment, stdout=log, stderr=log,
+            [
+                sys.executable,
+                "-m",
+                "sensor_workbench.cli",
+                "serve",
+                "--port",
+                str(port),
+            ],
+            env=environment,
+            stdout=log,
+            stderr=log,
         )
         try:
             health = None
             deadline = time.monotonic() + 10
             while time.monotonic() < deadline:
                 try:
-                    with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/v1/health", timeout=1) as response:
+                    with urllib.request.urlopen(
+                        f"http://127.0.0.1:{port}/api/v1/health", timeout=1
+                    ) as response:
                         health = json.load(response)
                     break
                 except urllib.error.URLError:
@@ -39,11 +51,14 @@ def test_real_cli_server_streams_and_shuts_down(tmp_path):
                     time.sleep(0.05)
             assert health is not None, "Server did not become healthy"
             assert health["status"] == "ok"
+
             async def receive_stream():
                 messages = []
                 async with connect(f"ws://127.0.0.1:{port}/api/v1/stream") as websocket:
                     for _ in range(6):
-                        messages.append(json.loads(await asyncio.wait_for(websocket.recv(), 2)))
+                        messages.append(
+                            json.loads(await asyncio.wait_for(websocket.recv(), 2))
+                        )
                 async with connect(f"ws://127.0.0.1:{port}/api/v1/stream") as websocket:
                     reconnect = json.loads(await asyncio.wait_for(websocket.recv(), 2))
                 assert all(item["run_id"] == health["run_id"] for item in messages)
@@ -52,10 +67,15 @@ def test_real_cli_server_streams_and_shuts_down(tmp_path):
                 last = messages[-1]["observation"]
                 sequence_delta = last["sequence"] - first["sequence"]
                 assert sequence_delta >= 5
-                assert int(last["raw_timestamp"]["value"]) - int(first["raw_timestamp"]["value"]) == sequence_delta * 100_000_000
+                assert (
+                    int(last["raw_timestamp"]["value"])
+                    - int(first["raw_timestamp"]["value"])
+                    == sequence_delta * 100_000_000
+                )
                 assert reconnect["observation"]["sequence"] > last["sequence"]
                 assert reconnect["run_id"] == health["run_id"]
                 assert reconnect["dropped_total"] == 0
+
             asyncio.run(receive_stream())
         finally:
             process.terminate()
@@ -65,5 +85,6 @@ def test_real_cli_server_streams_and_shuts_down(tmp_path):
                 process.kill()
                 process.wait(timeout=5)
                 raise AssertionError("Server did not shut down gracefully") from None
-    assert process.returncode == 0, log_path.read_text()
+    # Uvicorn restores and re-raises SIGTERM after completing lifespan shutdown.
+    assert process.returncode in (0, -signal.SIGTERM), log_path.read_text()
     assert "Application shutdown complete" in log_path.read_text()

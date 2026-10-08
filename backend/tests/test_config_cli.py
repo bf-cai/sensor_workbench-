@@ -15,7 +15,9 @@ def test_xdg_default_and_explicit_overrides(tmp_path, monkeypatch):
     assert load_settings().host == "127.0.0.1"
     assert load_settings().state_dir == tmp_path / "state/sensor-workbench"
     path = tmp_path / "custom.json"
-    path.write_text(json.dumps({"port": 9000, "state_dir": str(tmp_path / "custom-state")}))
+    path.write_text(
+        json.dumps({"port": 9000, "state_dir": str(tmp_path / "custom-state")})
+    )
     monkeypatch.setenv("SENSOR_WORKBENCH_CONFIG", str(path))
     assert load_settings().port == 9000
     assert load_settings().state_dir == tmp_path / "custom-state"
@@ -43,8 +45,10 @@ def test_missing_and_malformed_configuration_fail_explicitly(tmp_path):
 
 def test_configuration_permission_error_is_not_silently_ignored(tmp_path, monkeypatch):
     path = tmp_path / "config.json"
+
     def denied(*args, **kwargs):
         raise PermissionError("permission denied")
+
     monkeypatch.setattr(Path, "read_text", denied)
     with pytest.raises(PermissionError):
         load_settings(path)

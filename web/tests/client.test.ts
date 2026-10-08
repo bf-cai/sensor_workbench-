@@ -9,21 +9,40 @@ class SocketFixture {
   onerror: (() => void) | null = null;
   onmessage: ((event: MessageEvent<unknown>) => void) | null = null;
   close = vi.fn();
-  constructor(public url: string) { SocketFixture.instances.push(this); }
+  constructor(public url: string) {
+    SocketFixture.instances.push(this);
+  }
 }
 
-afterEach(() => { vi.unstubAllGlobals(); vi.useRealTimers(); SocketFixture.instances = []; });
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+  SocketFixture.instances = [];
+});
 
 describe("stream contract", () => {
   it("preserves integer strings without epoch rounding", () => {
-    expect(parseStreamMessage(JSON.stringify(message)).observation.raw_timestamp?.value)
-      .toBe("1790000000123456789");
+    expect(
+      parseStreamMessage(JSON.stringify(message)).observation.raw_timestamp
+        ?.value,
+    ).toBe("1790000000123456789");
   });
-  it.each(["{}", "not json", JSON.stringify({ ...message, dropped_total: -1 }),
+  it.each([
+    "{}",
+    "not json",
+    JSON.stringify({ ...message, dropped_total: -1 }),
     JSON.stringify({ ...message, schema_version: 2 }),
-    JSON.stringify({ ...message, observation: { ...message.observation, metric: { value: "bad" } } }),
-    JSON.stringify({ ...message, observation: { ...message.observation,
-      raw_timestamp: { value: 1790000000123456789 } } }),
+    JSON.stringify({
+      ...message,
+      observation: { ...message.observation, metric: { value: "bad" } },
+    }),
+    JSON.stringify({
+      ...message,
+      observation: {
+        ...message.observation,
+        raw_timestamp: { value: Number("1790000000123456789") },
+      },
+    }),
   ])("rejects malformed or unsupported input: %s", (text) => {
     expect(() => parseStreamMessage(text)).toThrow();
   });
@@ -36,7 +55,9 @@ describe("stream contract", () => {
     const first = SocketFixture.instances[0];
     expect(first?.url).toContain("/api/v1/stream");
     first?.onopen?.();
-    first?.onmessage?.(new MessageEvent("message", { data: JSON.stringify(message) }));
+    first?.onmessage?.(
+      new MessageEvent("message", { data: JSON.stringify(message) }),
+    );
     expect(receiver).toHaveBeenCalledWith(message);
     first?.onclose?.();
     expect(status).toHaveBeenLastCalledWith("Reconnecting");

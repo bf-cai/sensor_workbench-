@@ -21,6 +21,7 @@ def test_slow_subscriber_drops_oldest_without_blocking_others():
         assert fast.dropped_total == 0
         service.unsubscribe(slow)
         assert slow not in service.subscriptions
+
     asyncio.run(scenario())
 
 
@@ -43,6 +44,7 @@ def test_acquisition_runs_without_clients_and_cancels_cleanly():
         assert task.cancelled()
         assert service.task is None
         assert not service.subscriptions
+
     asyncio.run(scenario())
 
 
@@ -58,6 +60,7 @@ def test_connection_capacity_is_enforced():
 def test_stalled_event_loop_skips_slots_without_catchup_burst():
     async def scenario():
         import time
+
         service = Acquisition(SimulatedSource("test"), "boot", queue_size=10)
         subscription = service.subscribe()
         service.start()
@@ -68,4 +71,5 @@ def test_stalled_event_loop_skips_slots_without_catchup_burst():
         assert after_stall.observation.sequence >= 3
         assert subscription.queue.empty()
         await service.stop()
+
     asyncio.run(scenario())

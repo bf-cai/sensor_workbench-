@@ -12,16 +12,31 @@ from sensor_workbench.core.models import StreamMessage
 
 async def http_request(app, path):
     sent = []
+
     async def receive():
         return {"type": "http.request", "body": b"", "more_body": False}
+
     async def send(message):
         sent.append(message)
-    await app({
-        "type": "http", "asgi": {"version": "3.0", "spec_version": "2.4"}, "http_version": "1.1",
-        "method": "GET", "scheme": "http", "path": path, "raw_path": path.encode(),
-        "query_string": b"", "root_path": "", "headers": [(b"host", b"localhost")],
-        "server": ("localhost", 8765), "client": ("localhost", 12345),
-    }, receive, send)
+
+    await app(
+        {
+            "type": "http",
+            "asgi": {"version": "3.0", "spec_version": "2.4"},
+            "http_version": "1.1",
+            "method": "GET",
+            "scheme": "http",
+            "path": path,
+            "raw_path": path.encode(),
+            "query_string": b"",
+            "root_path": "",
+            "headers": [(b"host", b"localhost")],
+            "server": ("localhost", 8765),
+            "client": ("localhost", 12345),
+        },
+        receive,
+        send,
+    )
     status = sent[0]["status"]
     body = b"".join(message.get("body", b"") for message in sent[1:])
     return status, body
@@ -35,10 +50,17 @@ async def websocket_session(app, origin=None):
     if origin is not None:
         headers.append((b"origin", origin.encode()))
     scope = {
-        "type": "websocket", "asgi": {"version": "3.0"}, "scheme": "ws",
-        "path": "/api/v1/stream", "raw_path": b"/api/v1/stream", "root_path": "",
-        "query_string": b"", "headers": headers, "subprotocols": [],
-        "server": ("localhost", 8765), "client": ("localhost", 12345),
+        "type": "websocket",
+        "asgi": {"version": "3.0"},
+        "scheme": "ws",
+        "path": "/api/v1/stream",
+        "raw_path": b"/api/v1/stream",
+        "root_path": "",
+        "query_string": b"",
+        "headers": headers,
+        "subprotocols": [],
+        "server": ("localhost", 8765),
+        "client": ("localhost", 12345),
     }
     task = asyncio.create_task(app(scope, incoming.get, outgoing.put))
     return incoming, outgoing, task
@@ -66,6 +88,7 @@ def test_baseline_http_metadata_and_missing_assets(tmp_path):
             assert (await http_request(app, "/"))[0] == 503
             assert (await http_request(app, "/api/v1/nonexistent"))[0] == 404
         assert app.state.acquisition.task is None
+
     asyncio.run(scenario())
 
 
@@ -75,8 +98,12 @@ def test_websocket_messages_reconnect_identity_and_cleanup():
         async with app.router.lifespan_context(app):
             received = []
             for _ in range(2):
-                incoming, outgoing, task = await websocket_session(app, "http://localhost:8765")
-                assert (await asyncio.wait_for(outgoing.get(), 1))["type"] == "websocket.accept"
+                incoming, outgoing, task = await websocket_session(
+                    app, "http://localhost:8765"
+                )
+                assert (await asyncio.wait_for(outgoing.get(), 1))[
+                    "type"
+                ] == "websocket.accept"
                 payload = await asyncio.wait_for(outgoing.get(), 1)
                 assert payload["type"] == "websocket.send"
                 message = StreamMessage.model_validate_json(payload["text"])
@@ -89,20 +116,26 @@ def test_websocket_messages_reconnect_identity_and_cleanup():
                 await asyncio.wait_for(task, 1)
                 assert not app.state.acquisition.subscriptions
             assert received[0].run_id == received[1].run_id
-            assert received[0].observation.source_id == received[1].observation.source_id
+            assert (
+                received[0].observation.source_id == received[1].observation.source_id
+            )
             assert received[1].observation.sequence > received[0].observation.sequence
         assert app.state.acquisition.task is None
+
     asyncio.run(scenario())
 
 
 def test_foreign_browser_origin_is_rejected():
     async def scenario():
         app = create_app()
-        incoming, outgoing, task = await websocket_session(app, "https://untrusted.example")
+        _incoming, outgoing, task = await websocket_session(
+            app, "https://untrusted.example"
+        )
         message = await asyncio.wait_for(outgoing.get(), 1)
         assert message == {"type": "websocket.close", "code": 1008, "reason": ""}
         await asyncio.wait_for(task, 1)
         assert not app.state.acquisition.subscriptions
+
     asyncio.run(scenario())
 
 
@@ -112,11 +145,12 @@ def test_stream_limit_returns_retryable_close():
         service = app.state.acquisition
         service.max_subscribers = 1
         held = service.subscribe()
-        incoming, outgoing, task = await websocket_session(app)
+        _incoming, outgoing, task = await websocket_session(app)
         assert (await asyncio.wait_for(outgoing.get(), 1))["type"] == "websocket.accept"
         assert (await asyncio.wait_for(outgoing.get(), 1))["code"] == 1013
         await asyncio.wait_for(task, 1)
         service.unsubscribe(held)
+
     asyncio.run(scenario())
 
 
@@ -124,12 +158,17 @@ def test_built_index_and_assets_are_served(tmp_path):
     (tmp_path / "assets").mkdir()
     (tmp_path / "index.html").write_text("<html>fixture</html>")
     (tmp_path / "assets/test.js").write_text("console.log('fixture')")
+
     async def scenario():
         app = create_app(Settings(static_dir=tmp_path))
         async with app.router.lifespan_context(app):
             assert await http_request(app, "/") == (200, b"<html>fixture</html>")
-            assert await http_request(app, "/assets/test.js") == (200, b"console.log('fixture')")
+            assert await http_request(app, "/assets/test.js") == (
+                200,
+                b"console.log('fixture')",
+            )
             assert (await http_request(app, "/assets/../../config.py"))[0] == 404
+
     asyncio.run(scenario())
 
 
